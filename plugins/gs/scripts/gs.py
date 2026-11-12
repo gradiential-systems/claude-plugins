@@ -727,7 +727,7 @@ def cmd_init(args):
     cfg = {}
     copied, skipped = 0, []
     in_place = os.path.join(root, "starter.json")
-    if not args.starter and os.path.isfile(in_place):
+    if os.path.isfile(in_place) and args.starter in (None, (read_json(in_place) or {}).get("name")):
         # the person unpacked a starter into this folder: use it where it is
         cfg = read_json(in_place)
         args.starter = cfg.get("name") or os.path.basename(root)

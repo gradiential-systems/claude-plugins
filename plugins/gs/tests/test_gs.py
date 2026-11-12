@@ -562,6 +562,12 @@ class TestGeneric(GsCase):
         self.assertTrue(os.path.exists(os.path.join(self.dir, ".gs", "starter.json")))
         self.assertTrue(self.warned("check.py"))
 
+    def test_an_unpacked_starter_is_also_used_when_it_is_asked_for_by_name(self):
+        self.write("starter.json", json.dumps({"name": "my-kit"}))
+        code, output = self.gs("init", "--starter", "my-kit")
+        self.assertEqual(code, 0, output)
+        self.assertIn("used as it is", output)
+
     def test_a_starter_one_folder_down_gets_a_plain_instruction(self):
         self.write("my-kit/starter.json", json.dumps({"name": "my-kit"}))
         code, output = self.gs("init")
