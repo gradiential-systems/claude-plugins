@@ -551,6 +551,23 @@ class TestGeneric(GsCase):
         self.assertEqual(code, 0, output)
         self.assertEqual(self.state()["starter"], "my-kit")
 
+    def test_a_starter_unpacked_into_the_folder_is_used_where_it_is(self):
+        self.write("starter.json", json.dumps({"name": "my-kit", "protected_globs": ["check.py"]}))
+        self.write("check.py", "print('CHECK: PASS')\n")
+        code, output = self.gs("init")
+        self.assertEqual(code, 0, output)
+        self.assertIn("used as it is", output)
+        self.assertEqual(self.state()["starter"], "my-kit")
+        self.assertFalse(os.path.exists(os.path.join(self.dir, "starter.json")))
+        self.assertTrue(os.path.exists(os.path.join(self.dir, ".gs", "starter.json")))
+        self.assertTrue(self.warned("check.py"))
+
+    def test_a_starter_one_folder_down_gets_a_plain_instruction(self):
+        self.write("my-kit/starter.json", json.dumps({"name": "my-kit"}))
+        code, output = self.gs("init")
+        self.assertEqual(code, 1)
+        self.assertIn("one folder down, in 'my-kit'", output)
+
     def test_a_project_without_a_starter_saves_no_tool_answers_and_names_no_service(self):
         self.gs("init")
         self.hook("post-tool", {"tool_name": "mcp__anything__read_rows", "tool_input": {"q": "x"},

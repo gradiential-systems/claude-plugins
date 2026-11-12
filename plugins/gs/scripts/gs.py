@@ -710,6 +710,15 @@ def starter_source(name):
                   % (name, ", ".join(sorted(folders)) or "none"))
 
 
+def need_python(cfg):
+    need = cfg.get("min_python")
+    if need and not os.environ.get("GS_PYTHON"):
+        have = sys.version_info[:2]
+        if have < tuple(int(x) for x in need.split(".")[:2]):
+            raise Problem("This starter needs Python %s or later; this computer runs Python %d.%d."
+                          % (need, have[0], have[1]))
+
+
 def cmd_init(args):
     root = os.getcwd()
     if find_root(root):
@@ -717,17 +726,28 @@ def cmd_init(args):
         return cmd_status(args)
     cfg = {}
     copied, skipped = 0, []
-    if args.starter:
+    in_place = os.path.join(root, "starter.json")
+    if not args.starter and os.path.isfile(in_place):
+        # the person unpacked a starter into this folder: use it where it is
+        cfg = read_json(in_place)
+        args.starter = cfg.get("name") or os.path.basename(root)
+        need_python(cfg)
+        os.remove(in_place)
+        unpacked = True
+    elif not args.starter:
+        unpacked = False
+        inner = sorted(name for name in os.listdir(root)
+                       if os.path.isfile(os.path.join(root, name, "starter.json")))
+        if len(inner) == 1:
+            raise Problem("The starter is one folder down, in '%s'. Ask the person to open that folder in the app "
+                          "(not this one) and to type the command again." % inner[0])
+    else:
+        unpacked = False
+    if args.starter and not unpacked:
         source = starter_source(args.starter)
         cfg = read_json(os.path.join(source, "starter.json"))
         args.starter = cfg.get("name") or os.path.basename(source)
-        need = cfg.get("min_python")
-        if need and not os.environ.get("GS_PYTHON"):
-            have = sys.version_info[:2]
-            want = tuple(int(x) for x in need.split(".")[:2])
-            if have < want:
-                raise Problem("This starter needs Python %s or later; this computer runs Python %d.%d."
-                              % (need, have[0], have[1]))
+        need_python(cfg)
         copied, skipped = copy_starter(source, root)
     os.makedirs(os.path.join(root, ".gs", "logs"), exist_ok=True)
     os.makedirs(os.path.join(root, "docs"), exist_ok=True)
@@ -761,7 +781,9 @@ def cmd_init(args):
     ok, _ = git(project, "commit", "-m", "chore: start project with gs")
     project.log("init", starter=args.starter)
     out("Started the project '%s' in this folder." % state["project"])
-    if args.starter:
+    if args.starter and unpacked:
+        out("This folder holds the starter '%s', unpacked here by the person. It is used as it is." % args.starter)
+    elif args.starter:
         out("Copied %d starter files%s." % (copied, " (%d already existed and were left alone)" % len(skipped) if skipped else ""))
     out("Versions are saved with git." if ok else "The first version could not be saved; ask for 'save a version' later.")
     out(*notes)

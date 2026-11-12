@@ -41,6 +41,7 @@ The person is an expert in their own work and is not a programmer. Everything th
    - No project yet: continue.
 
 2. Decide what is being built.
+   - The folder holds a file named `starter.json`: the person unpacked a starter here. Go to step 4 and run plain `GS init`, which uses the starter where it is. Skip step 3.
    - The person named a starter (the argument): use it.
    - The person already said what they want: use their sentence.
    - Otherwise run `GS starters` and ask one question, with the options written in the chat and also offered through the question tool when it is available: "What do you want to build in this folder?" The first option is "Something of my own. I describe it in one sentence." Each starter listed is a further option, with its one-line description as a full sentence.
