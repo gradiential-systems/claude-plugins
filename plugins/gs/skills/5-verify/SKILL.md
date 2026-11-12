@@ -6,7 +6,7 @@ allowed-tools: Bash(python *gs.py*), Bash(python3 *gs.py*), Bash(py *gs.py*), Po
 
 # Step 5 of 7: Verify
 
-`GS` means `python "${CLAUDE_PLUGIN_ROOT}/scripts/gs.py"` (`python3` on macOS). Run each `GS` command by itself, never joined with `;` or `&&`: only the plain command runs without a permission prompt. You run commands; the person types only `/gs:` commands and never opens a terminal.
+`GS` means `python "${CLAUDE_PLUGIN_ROOT}/scripts/gs.py"` (`python3` on macOS; `py` on Windows when `python` is not found). Run each `GS` command by itself, never joined with `;` or `&&`: only the plain command runs without a permission prompt. You run commands; the person types only `/gs:` commands and never opens a terminal.
 
 The builder is the worst judge of its own work, so the evidence comes from three places that do not depend on your word: the check, a fresh checker that never sees the build story, and the person's own records.
 

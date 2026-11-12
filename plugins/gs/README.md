@@ -55,7 +55,15 @@ Then start a new session, open an empty folder for your project, and type:
 
 It shows the seven steps. It also tells you if Python, Git and the automatic reminders are ready on your computer.
 
-You need: the Claude desktop app (or Claude Code) on a paid Claude plan, Python 3.11 or later, and Git.
+You need these three things:
+
+- The Claude desktop app, or Claude Code, on a paid Claude plan.
+- Python 3.11 or later.
+- Git. On Windows, install Git for Windows. It includes Git Bash, which Claude uses to run commands and the automatic reminders.
+
+On Windows, if you install Python or Git while the Claude app is open, quit the app and open it again.
+
+If the two typed lines do not work in the desktop app, use the menu. Click the **+** button next to the prompt box, then select **Plugins** or **Add plugins**.
 
 ## Use
 

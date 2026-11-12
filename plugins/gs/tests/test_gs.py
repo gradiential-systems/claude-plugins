@@ -349,6 +349,17 @@ class TestHooks(GsCase):
             self.assertIsNone(self.hook(event, {"prompt": "hello", "tool_name": "Write",
                                                 "tool_input": {"file_path": os.path.join(self.dir, "a.py")}}))
 
+    def test_hook_input_is_read_as_utf8_whatever_the_system_code_page(self):
+        # On Windows, Python reads standard input in the system code page (cp1252) unless told otherwise.
+        self.gs("init")
+        self.env["PYTHONIOENCODING"] = "cp1252"
+        payload = {"cwd": self.dir, "prompt": "/gs:help is the caf\u00e9 list right? \u201cyes\u201d \u2014 \U0001F600"}
+        code, output = self.gs("hook", "user-prompt", stdin=json.dumps(payload, ensure_ascii=False))  # raw UTF-8 bytes
+        self.assertEqual(code, 0, output)
+        answer = json.loads(output)
+        # the prompt was understood as a gs command, so the full status comes back, not the one-line reminder
+        self.assertIn("gs project status", answer["hookSpecificOutput"]["additionalContext"])
+
     def test_hook_survives_bad_input(self):
         code, output = self.gs("hook", "pre-tool", stdin="not json")
         self.assertEqual((code, output), (0, ""))

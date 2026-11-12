@@ -14,6 +14,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 
 SCHEMA = "gs/1"
 STAGES = ["explore", "define", "design", "implement", "verify", "deploy", "operate"]
@@ -105,7 +106,15 @@ def write_text(path, text):
     temp = path + ".tmp"
     with open(temp, "w", encoding="utf-8", newline="\n") as handle:
         handle.write(text)
-    os.replace(temp, path)
+    for attempt in range(6):
+        try:
+            os.replace(temp, path)
+            return
+        except PermissionError:
+            # on Windows a virus scanner or a file-sync program can hold the file for a moment
+            if attempt == 5:
+                raise
+            time.sleep(0.05 * (attempt + 1))
 
 
 def read_json(path, default=None):
@@ -161,7 +170,12 @@ def plugin_root():
 
 def plugin_data_dir():
     """One fixed folder, so that a hook and a command run by Claude both find the same files."""
-    return os.path.join(os.path.expanduser("~"), ".claude", "gs-plugin-data")
+    return os.path.join(claude_config_dir(), "gs-plugin-data")
+
+
+def claude_config_dir():
+    """Claude Code's own folder: ~/.claude (on Windows %USERPROFILE%\\.claude), unless CLAUDE_CONFIG_DIR moves it."""
+    return os.environ.get("CLAUDE_CONFIG_DIR") or os.path.join(os.path.expanduser("~"), ".claude")
 
 
 LAUNCHER = ""   # the command name that started this hook (python, python3 or py), when known
@@ -682,8 +696,8 @@ def starter_folders():
     and this finds them in the list of installed plugins that Claude Code keeps. GS_STARTER_PATH adds folders."""
     roots = [os.path.join(plugin_root(), "starters")]
     roots += [folder for folder in os.environ.get("GS_STARTER_PATH", "").split(os.pathsep) if folder]
-    config = os.environ.get("CLAUDE_CONFIG_DIR") or os.path.join(os.path.expanduser("~"), ".claude")
-    installed = (read_json(os.path.join(config, "plugins", "installed_plugins.json")) or {}).get("plugins") or {}
+    plugins = os.environ.get("CLAUDE_CODE_PLUGIN_CACHE_DIR") or os.path.join(claude_config_dir(), "plugins")
+    installed = (read_json(os.path.join(plugins, "installed_plugins.json")) or {}).get("plugins") or {}
     for entries in installed.values():
         for entry in entries if isinstance(entries, list) else []:
             if isinstance(entry, dict) and entry.get("installPath"):
@@ -1245,7 +1259,11 @@ def cmd_doctor(args):
 
 def hook_input():
     try:
-        raw = sys.stdin.read()
+        # Claude Code sends UTF-8. Read the bytes and decode them here: on Windows, Python would otherwise
+        # decode the input with the system code page and spoil or reject any character outside it.
+        source = getattr(sys.stdin, "buffer", None)
+        raw = source.read().decode("utf-8", "replace") if source else sys.stdin.read()
+        raw = raw.lstrip("\ufeff")
         return json.loads(raw) if raw.strip() else {}
     except (ValueError, OSError):
         return {}
