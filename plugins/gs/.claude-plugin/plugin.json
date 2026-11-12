@@ -1,0 +1,15 @@
+{
+  "name": "gs",
+  "description": "A guided, spec-driven way for subject-matter experts to build small tools with Claude Code: Explore, Define, Design, Implement, Verify, Deploy, Operate, with gates that only you can open and checks that run on their own.",
+  "author": {
+    "name": "Gradiential Systems"
+  },
+  "license": "MIT",
+  "keywords": [
+    "spec-driven-development",
+    "guardrails",
+    "non-programmers",
+    "workflow",
+    "training"
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "description": "gs: where-you-are reminders, heads-ups when a step is skipped, and the automatic check. They never refuse anything and are silent outside a gs project.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook session-start --via python || python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook session-start --via python3 || py \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook session-start --via py",
+            "timeout": 20,
+            "onFailure": "continue"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook user-prompt --via python || python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook user-prompt --via python3 || py \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook user-prompt --via py",
+            "timeout": 180,
+            "onFailure": "continue"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook pre-tool --via python || python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook pre-tool --via python3 || py \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook pre-tool --via py",
+            "timeout": 20,
+            "onFailure": "continue"
+          }
+        ],
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook post-tool --via python || python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook post-tool --via python3 || py \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook post-tool --via py",
+            "timeout": 20,
+            "onFailure": "continue"
+          }
+        ],
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook post-tool --via python || python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook post-tool --via python3 || py \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook post-tool --via py",
+            "timeout": 20,
+            "onFailure": "continue"
+          }
+        ],
+        "matcher": "mcp__.*"
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook stop --via python || python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook stop --via python3 || py \"${CLAUDE_PLUGIN_ROOT}/scripts/gs.py\" hook stop --via py",
+            "timeout": 180,
+            "onFailure": "continue"
+          }
+        ]
+      }
+    ]
+  }
+}
